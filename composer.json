@@ -1,0 +1,17 @@
+{
+    "name": "xxlv/blockchain_php",
+    "authors": [
+        {
+            "name": "x",
+            "email": "lvxx@dxyer.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bc\\": "src/"
+        }
+    },
+    "require": {
+        "symfony/console": "^3.4"
+    }
+}
