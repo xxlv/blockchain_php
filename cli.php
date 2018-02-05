@@ -16,11 +16,12 @@ require __DIR__ . '/vendor/autoload.php';
 use Symfony\Component\Console\Application;
 
 
-
 $application = new Application();
 
 $application->setName('Blockchain in PHP');
 
-$application->add(new \Bc\Command\BlockChainCmd());
+$application->add(new \Bc\Command\MineCmd());
+$application->add(new \Bc\Command\TransactionCmd());
+$application->add(new \Bc\Command\WalletCmd());
 
 $application->run();

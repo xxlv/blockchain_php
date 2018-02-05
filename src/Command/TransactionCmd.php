@@ -17,34 +17,39 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BlockChainCmd extends Command
+class TransactionCmd extends Command
 {
     protected function configure ()
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('bc:mine')
+            ->setName('bc:transaction')
+            ->addArgument('from')
+            ->addArgument('to')
+            ->addArgument('mount')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Creates a new block.')
+            ->setDescription('发起一笔交易.')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp('This command allows you to create a new block...');
+            ->setHelp('This command allows you to create a new transaction...');
     }
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-        $output->writeln([
-            'create block success!',
-        ]);
 
         $blockChain = new BlockChain();
+        $from = $input->getArgument('from');
+        $to = $input->getArgument('to');
+        $mount = $input->getArgument('mount');
 
-        while (Ture) {
+        $output->writeln([
+            sprintf('Transaction process success from %s to %s mount:%s!', $from, $to, $mount)
+        ]);
 
-            $blockChain->mine();
-            $output->writeln('Current Block' . json_encode($blockChain->getChain()));
-            sleep(3);
-        }
+        $blockChain->newTransaction($from, $to, $mount);
 
+        $output->writeln([
+            sprintf('Transaction hash is:%s!', $blockChain->getCurrentTransactions()[0]->hash())
+        ]);
     }
 }
