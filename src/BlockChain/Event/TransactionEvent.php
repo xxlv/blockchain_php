@@ -8,8 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Bc\BlockChain\Network;
+namespace Bc\BlockChain\Event;
 
+
+use Bc\BlockChain\DataLayer\SpaceX;
 
 class TransactionEvent extends Event
 {
@@ -17,12 +19,19 @@ class TransactionEvent extends Event
 
     public $data;
 
+    public $dataMoon;
+
 
     public function __construct ($transaction)
     {
         $this->data = $transaction;
+        $this->dataMoon = new SpaceX();
     }
 
+    public function emit ()
+    {
+        $this->dataMoon->appendTransactionsToMemory($this->data);
+    }
 
 
 }

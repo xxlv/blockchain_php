@@ -10,11 +10,17 @@
  */
 namespace Bc\BlockChain;
 
+use Bc\BlockChain\DataLayer\SpaceX;
 use Bc\Tools\Hash;
+use Bc\Tools\Log;
 
 class BlockChain
 {
 
+    public $id = 'SPACE-X-BLOCK-CHAIN-BY-GHOST';
+
+    // Data layer
+    public $dataMoon;
     /**
      * 区块链,保存全部区块链数据
      *
@@ -24,6 +30,10 @@ class BlockChain
 
     public $nodes = [];
 
+    public $currentBlockChainHeight = 0;
+
+    public $currentBlock;
+
     /**
      * 当前待写入区块的交易记录
      *
@@ -31,20 +41,18 @@ class BlockChain
      */
     public $currentTransactions = [];
 
-
     /**
      * 当前区块的难度系数
      *
      * @var string
      */
-    public $difficulty = '0000';
+    public $difficulty = '00';
 
 
     public function __construct ()
     {
+        $this->dataMoon = new SpaceX();
         $this->initBlockChain();
-        $this->initNodes();
-
     }
 
 
@@ -68,14 +76,24 @@ class BlockChain
 
     public function initBlockChain ()
     {
-        $this->makeGenesisBlock();
+        $this->loadBlockChain();
+        // init current blockchain params
+        $this->currentBlockChainHeight = $this->dataMoon->getCurrentBlockChainHeight();
+        $this->currentBlock = $this->dataMoon->getCurrentBlock();
     }
 
+    protected function loadBlockChain ()
+    {
+        $this->makeGenesisBlock();
+
+    }
 
     protected function makeGenesisBlock ()
     {
-        if (count($this->chains) < 1) {
-            $this->newBlock(0, 0);
+        if ($this->getCurrentBlockChainHeight() < 1) {
+            Log::info('Make genesis block');
+
+            $this->newBlock(0, 0, []);
         }
     }
 
@@ -93,9 +111,9 @@ class BlockChain
 
     public function initNodes ()
     {
-        $this->nodes = [
-            new Node('127.0.0.1', '3321')
-        ];
+        //$this->nodes = [
+        //    new Node('127.0.0.1', '3321')
+        //];
     }
 
     public function getCurrentSubsidy ()
@@ -109,16 +127,23 @@ class BlockChain
     public function mine ()
     {
         // 获取当前的交易信息
-        $currentTransactions = $this->getCurrentTransactions();
-        $chains = $this->chains;
+        //$currentTransactions = $this->getCurrentTransactions();
+        //$chains = $this->getChains();
         // 获取当前区块链上的最后一个区块
-        $lastBlock = $chains[count($chains) - 1];
+        //$lastBlock = $chains[$this->getCurrentBlockChainHeight()];
+
+        $lastBlock = $this->getCurrentBlock();
         // 获取工作证明
         // 这里会是一个大量计算的循环
-        $proof = $this->proofOfWork($lastBlock, $currentTransactions);
+        $pow = $this->proofOfWork($lastBlock);
+
+
+        $currentTransactions = $pow['currentTransactions'];
+        $proof = $pow['proof'];
+
 
         // 创建block
-        $this->newBlock($proof, $this->hash($lastBlock));
+        $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions);
     }
 
     /**
@@ -190,57 +215,47 @@ class BlockChain
      *
      * @param $proof
      * @param $preHash
+     * @param $currentTransactions
      *
      * @return array
      */
-    public function newBlock ($proof, $preHash)
+    public function newBlock ($proof, $preHash, $currentTransactions)
     {
-        $blockChainHeight = count($this->chains);
+        $blockChainHeight = $this->getCurrentBlockChainHeight();
+
         if ($blockChainHeight === 0) {
-            $this->currentTransactions[] = $this->makeCoinBaseTransactions();
+            $currentTransactions[] = $this->makeCoinBaseTransactions();
         }
-        $block = new Block(count($this->chains) + 1, time(), $this->currentTransactions, $proof, $preHash);
+        $block = new Block($blockChainHeight + 1, time(), $currentTransactions, $proof, $preHash);
 
         $this->appendToChain($block);
 
-        //将currentTransactions 设置为空
-        $this->currentTransactions = [];
-
         return $block;
     }
-
-    //public function newTransaction ($from, $to, $amount)
-    //{
-    //    $this->currentTransactions[] = (new Transaction())->createTransaction($from, $to, $amount);
-    //
-    //    return $this;
-    //}
 
     /**
      * 工作量证明
      *
      * @param $lastBlock
-     * @param $currentTransactions
      *
      * @return int
      */
-    public function proofOfWork ($lastBlock, $currentTransactions)
+    public function proofOfWork ($lastBlock)
     {
+
         $preHash = $this->hash($lastBlock);
         $guessProof = 0;
         // main Loop
         while (true) {
+            $currentTransactions = $this->getCurrentTransactions();
             //Only transactions found
             if ($currentTransactions) {
                 $hash = Hash::hash(sprintf('%s%s%s', $preHash, Hash::makeHashAble($currentTransactions), $guessProof));
                 if (substr($hash, 0, strlen($this->getDifficulty())) === $this->getDifficulty()) {
-                    return $guessProof;
+                    return ['proof' => $guessProof, 'currentTransactions' => $currentTransactions];
                 }
                 $guessProof++;
-            } else {
-                //...
             }
-
         }
     }
 
@@ -248,9 +263,8 @@ class BlockChain
     protected function appendToChain ($block)
     {
         if ($this->verifyBlock($block)) {
-            $this->chains[] = $block;
+            $this->dataMoon->appendToChain($block);
         }
-
     }
 
     /**
@@ -274,8 +288,26 @@ class BlockChain
      */
     public function getCurrentTransactions ()
     {
-        return $this->currentTransactions;
+        return $this->dataMoon->getCurrentTransactions();
     }
+
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentBlock ()
+    {
+        return $this->dataMoon->getCurrentBlock();
+    }
+
+    /**
+     * @return int
+     */
+    public function getCurrentBlockChainHeight ()
+    {
+        return $this->dataMoon->getCurrentBlockChainHeight();
+    }
+
 }
 
 

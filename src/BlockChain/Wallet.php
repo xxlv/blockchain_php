@@ -12,7 +12,7 @@ namespace Bc\BlockChain;
 
 
 use Bc\BlockChain\Network\Network;
-use Bc\BlockChain\Network\TransactionEvent;
+use Bc\BlockChain\Event\TransactionEvent;
 use Bc\Tools\Hash;
 
 class Wallet
@@ -63,7 +63,10 @@ class Wallet
         $transaction = (new Transaction())->createTransaction($from, $to, $amount);
 
         if ($this->verifyTransaction($transaction)) {
+            //将交易发布到网络上
             $event = new TransactionEvent($transaction);
+            $event->emit();
+
             // 将此消息广播到网络上
             Network::broadcast($event);
         }

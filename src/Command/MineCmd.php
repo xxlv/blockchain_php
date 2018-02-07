@@ -13,6 +13,7 @@ namespace Bc\Command;
 
 
 use Bc\BlockChain\BlockChain;
+use Bc\BlockChain\DataLayer\SpaceX;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,20 +34,28 @@ class MineCmd extends Command
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-
-
         $blockChain = new BlockChain();
+
+        $dataMoon = new SpaceX();
         $output->writeln([
+            'Current Blockchain H:' . $dataMoon->getCurrentBlockChainHeight(),
             'prepare to mining...',
         ]);
-        while (true) {
 
+        while (true) {
             $blockChain->mine();
-            $output->writeln('Current Block' . json_encode($blockChain->getChain()));
+
             $output->writeln([
-                'create block success!',
+                'create block success #!' . $dataMoon->getCurrentBlockChainHeight(),
+                json_encode($dataMoon->getCurrentBlock()->block()),
             ]);
+
+            // 将内存中的交易删除
+            $dataMoon->emptyTransactionsInMemory();
+
+
         }
+
 
     }
 }

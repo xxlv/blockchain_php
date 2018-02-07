@@ -18,4 +18,9 @@ class Network
     {
         //...
     }
+
+    public function route ()
+    {
+        //...
+    }
 }
