@@ -11,15 +11,25 @@
 namespace Bc\BlockChain\Tx;
 
 
-class TxOut
+class TxOutput
 {
-    public $publicKey;
+    public $scriptPublicKey;
     public $value;
 
     public function __construct ($address, $value)
     {
-        $this->publicKey = $address;
+        //...TODO
+        $scriptPublicKey = $address;
+
+        $this->scriptPublicKey = $scriptPublicKey;
         $this->value = $value;
+    }
+
+    public function verifySig ($scriptPublicKey)
+    {
+        $publicKey = $this->scriptPublicKey;
+        //...
+        return true;
     }
 
 }

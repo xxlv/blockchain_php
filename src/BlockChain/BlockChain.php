@@ -20,16 +20,16 @@ class BlockChain
      *
      * @var array
      */
-    protected $chains = [];
+    public $chains = [];
 
-    protected $nodes = [];
+    public $nodes = [];
 
     /**
      * 当前待写入区块的交易记录
      *
      * @var array
      */
-    protected $currentTransactions = [];
+    public $currentTransactions = [];
 
 
     /**
@@ -37,7 +37,7 @@ class BlockChain
      *
      * @var string
      */
-    protected $difficulty = '0000';
+    public $difficulty = '0000';
 
 
     public function __construct ()
@@ -84,8 +84,9 @@ class BlockChain
         $transaction = new Transaction();
         $from = '1993NWvTcDpVvpRTHjybyassDSH86UQgEA';
         $to = '163BGbKbW8PeC4GFgKS8XdgaaV3AUvtbdp';
-        $mount = 50;
-        $transaction->createTransaction($from, $to, $mount, true);
+        $subsidy = $this->getCurrentTransactions();
+
+        $transaction->createTransaction($from, $to, $subsidy, true, $this);
 
         return $transaction;
     }
@@ -95,6 +96,11 @@ class BlockChain
         $this->nodes = [
             new Node('127.0.0.1', '3321')
         ];
+    }
+
+    public function getCurrentSubsidy ()
+    {
+        return 50;
     }
 
     /**
@@ -203,12 +209,12 @@ class BlockChain
         return $block;
     }
 
-    public function newTransaction ($from, $to, $amount)
-    {
-        $this->currentTransactions[] = (new Transaction())->createTransaction($from, $to, $amount)->transaction();
-
-        return $this;
-    }
+    //public function newTransaction ($from, $to, $amount)
+    //{
+    //    $this->currentTransactions[] = (new Transaction())->createTransaction($from, $to, $amount);
+    //
+    //    return $this;
+    //}
 
     /**
      * 工作量证明
@@ -270,8 +276,6 @@ class BlockChain
     {
         return $this->currentTransactions;
     }
-
-
 }
 
 

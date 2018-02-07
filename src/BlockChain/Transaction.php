@@ -12,7 +12,8 @@ namespace Bc\BlockChain;
 
 
 use Bc\BlockChain\Tx\TxInput;
-use Bc\BlockChain\Tx\TxOut;
+use Bc\BlockChain\Tx\TxOutput;
+use Bc\Tools\Hash;
 
 class Transaction
 {
@@ -27,42 +28,47 @@ class Transaction
      * @var
      */
     public $isCoinBase;
+    public $txInputMap;
+    public $txOutputMap;
 
-    public $txInput;
-    public $txOutput;
 
-
-    public function createTransaction ($from, $to, $amount, $isCoinBase = false)
+    public function createTransaction ($from, $to, $amount, $isCoinBase = false, $blockchain = null)
     {
         $this->from = $from;
         $this->to = $to;
         $this->amount = $amount;
         $this->isCoinBase = $isCoinBase;
 
-        $this->makeTxInput();
-        $this->makeTxOutput();
+        $this->makeTxInput($blockchain);
+        $this->makeTxOutput($blockchain);
 
         return $this;
     }
-
 
     public function isCoinBase ()
     {
         return $this->isCoinBase;
     }
 
-    public function makeTxInput ()
+    public function makeTxInput ($blockchain)
     {
-        $txInput = new TxInput($this->hash(), $this->makeScriptSig($this->from));
+        $scriptSig = $this->makeScriptSig($this->from);
 
-        $this->txInput = $txInput;
+        // first tx in
+        if ($blockchain && count($blockchain->chains) < 1) {
+            $scriptSig = 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks';
+        }
+
+        $txInput = new TxInput($this->hash(), $scriptSig);
+
+        $this->txInputMap = [$txInput];
     }
 
-    public function makeTxOutput ()
+    public function makeTxOutput ($blockchain)
     {
-        $txOutput = new TxOut($this->from, $this->amount);
+        $txOutput = new TxOutput($this->from, $this->amount);
 
-        $this->txOutput = $txOutput;
+        $this->txOutputMap = [$txOutput];
     }
 
     public function makeScriptSig ($address)
@@ -70,6 +76,7 @@ class Transaction
         $wallet = new Wallet();
 
         return $wallet->makeScriptSig($address);
+
     }
 
     public function transaction ()
@@ -96,7 +103,7 @@ class Transaction
 
     public function hash ()
     {
-        return sha1(sha1($this->serialize()));
+        return Hash::hash($this->serialize());
     }
 
 }

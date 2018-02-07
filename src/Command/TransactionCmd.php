@@ -13,6 +13,7 @@ namespace Bc\Command;
 
 
 use Bc\BlockChain\BlockChain;
+use Bc\BlockChain\Wallet;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,7 +38,7 @@ class TransactionCmd extends Command
     protected function execute (InputInterface $input, OutputInterface $output)
     {
 
-        $blockChain = new BlockChain();
+        $wallet = new Wallet();
         $from = $input->getArgument('from');
         $to = $input->getArgument('to');
         $mount = $input->getArgument('mount');
@@ -46,10 +47,10 @@ class TransactionCmd extends Command
             sprintf('Transaction process success from %s to %s mount:%s!', $from, $to, $mount)
         ]);
 
-        $blockChain->newTransaction($from, $to, $mount);
+        $transaction = $wallet->newTransaction($from, $to, $mount);
 
         $output->writeln([
-            sprintf('Transaction hash is:%s!', $blockChain->getCurrentTransactions()[0]->hash())
+            sprintf('Transaction hash is:%s!', $transaction->hash())
         ]);
     }
 }

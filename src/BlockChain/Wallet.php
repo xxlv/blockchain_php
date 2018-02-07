@@ -11,6 +11,8 @@
 namespace Bc\BlockChain;
 
 
+use Bc\BlockChain\Network\Network;
+use Bc\BlockChain\Network\TransactionEvent;
 use Bc\Tools\Hash;
 
 class Wallet
@@ -28,7 +30,6 @@ class Wallet
         return 0;
     }
 
-
     public function verifyWalletAddress ($walletAddress)
     {
         if (is_string($walletAddress) && strlen($walletAddress) > 0) {
@@ -36,6 +37,11 @@ class Wallet
         }
 
         return false;
+    }
+
+    public function verifyTransaction (Transaction $transaction)
+    {
+        return true;
     }
 
     /**
@@ -49,5 +55,20 @@ class Wallet
     {
         // TODO
         return Hash::hash('TODO');
+    }
+
+
+    public function newTransaction ($from, $to, $amount)
+    {
+        $transaction = (new Transaction())->createTransaction($from, $to, $amount);
+
+        if ($this->verifyTransaction($transaction)) {
+            $event = new TransactionEvent($transaction);
+            // 将此消息广播到网络上
+            Network::broadcast($event);
+        }
+
+
+        return $transaction;
     }
 }
