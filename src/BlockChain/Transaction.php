@@ -11,6 +11,9 @@
 namespace Bc\BlockChain;
 
 
+use Bc\BlockChain\Tx\TxInput;
+use Bc\BlockChain\Tx\TxOut;
+
 class Transaction
 {
 
@@ -25,6 +28,9 @@ class Transaction
      */
     public $isCoinBase;
 
+    public $txInput;
+    public $txOutput;
+
 
     public function createTransaction ($from, $to, $amount, $isCoinBase = false)
     {
@@ -33,6 +39,9 @@ class Transaction
         $this->amount = $amount;
         $this->isCoinBase = $isCoinBase;
 
+        $this->makeTxInput();
+        $this->makeTxOutput();
+
         return $this;
     }
 
@@ -40,6 +49,27 @@ class Transaction
     public function isCoinBase ()
     {
         return $this->isCoinBase;
+    }
+
+    public function makeTxInput ()
+    {
+        $txInput = new TxInput($this->hash(), $this->makeScriptSig($this->from));
+
+        $this->txInput = $txInput;
+    }
+
+    public function makeTxOutput ()
+    {
+        $txOutput = new TxOut($this->from, $this->amount);
+
+        $this->txOutput = $txOutput;
+    }
+
+    public function makeScriptSig ($address)
+    {
+        $wallet = new Wallet();
+
+        return $wallet->makeScriptSig($address);
     }
 
     public function transaction ()
@@ -54,6 +84,15 @@ class Transaction
         return json_encode((array)$transaction);
     }
 
+    public function getTxInput ()
+    {
+        return $this->txInput;
+    }
+
+    public function getTxOutput ()
+    {
+        return $this->txOutput;
+    }
 
     public function hash ()
     {

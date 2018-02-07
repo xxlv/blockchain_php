@@ -11,6 +11,8 @@
 namespace Bc\BlockChain;
 
 
+use Bc\Tools\Hash;
+
 class Wallet
 {
 
@@ -34,5 +36,18 @@ class Wallet
         }
 
         return false;
+    }
+
+    /**
+     * make a script signature
+     *
+     * @param $address
+     *
+     * @return string
+     */
+    public function makeScriptSig ($address)
+    {
+        // TODO
+        return Hash::hash('TODO');
     }
 }
