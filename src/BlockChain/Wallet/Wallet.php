@@ -13,13 +13,22 @@ namespace Bc\BlockChain\Wallet;
 
 use Bc\BlockChain\BlockChain;
 use Bc\BlockChain\Event\Event;
-use Bc\BlockChain\Network\Network;
+use Bc\BlockChain\NetworkLayer\Network;
 use Bc\BlockChain\Event\TransactionEvent;
 use Bc\BlockChain\Transaction;
-use Bc\Tools\Hash;
 
 class Wallet
 {
+
+    public $ecdsa;
+
+    public $blockchain;
+
+    public function __construct ()
+    {
+        $this->ecdsa = new Ecdsa();
+    }
+
 
     public function balanceOf ($walletAddress)
     {
@@ -40,11 +49,7 @@ class Wallet
 
     public function verifyWalletAddress ($walletAddress)
     {
-        if (is_string($walletAddress) && strlen($walletAddress) > 0) {
-            return true;
-        }
-
-        return false;
+        return $this->ecdsa->validateAddress($walletAddress);
     }
 
     public function verifyTransaction (Transaction $transaction)
@@ -56,7 +61,7 @@ class Wallet
         $amount = $transaction->getAmount();
 
         //TODO
-        $currentSubsidy = 30;
+        $currentSubsidy = 50;
 
         if ($transaction->isCoinBase()) {
             if (!$this->verifyWalletAddress($to)) {
@@ -66,10 +71,12 @@ class Wallet
                 return true;
             }
         } else {
+
             $verifyAddress = $this->verifyWalletAddress($from) && $this->verifyWalletAddress($to);
             if ($verifyAddress) {
+
                 if ($this->verifyWalletAddressHasMoney($from, $amount)) {
-                    //...
+
                     return true;
                 }
             }
@@ -90,7 +97,13 @@ class Wallet
      */
     public function verifyWalletAddressHasMoney ($address, $money)
     {
-        return true;
+        $uxto = (new BlockChain())->findUXTO($address);
+
+        if ($uxto && $uxto >= $money) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -102,10 +115,24 @@ class Wallet
      */
     public function makeScriptSig ($address)
     {
-        // TODO
-        return Hash::hash('TODO');
+        $msg = 'BLOCKCHAIN_' . date('Y-m-dHis') . random_int(1, 10000);
+
+        $privateKey = $this->getPrivateKey($address);
+        if ($privateKey) {
+            $this->ecdsa->setPrivateKey($privateKey);
+            $sig = $this->ecdsa->signMessage($msg, true);
+        } else {
+            $sig = false;
+        }
+
+        return ['origin' => $msg, 'scriptSig' => $sig];
     }
 
+    public function getPrivateKey ($address)
+    {
+        //TODO load private key from wallet
+        return '';
+    }
 
     public function newTransaction ($from, $to, $amount)
     {
@@ -118,9 +145,13 @@ class Wallet
             Event::fire($event);
             // 将此消息广播到网络上
             Network::broadcast($event);
+
+            return $transaction;
+
+        } else {
+            return false;
         }
 
 
-        return $transaction;
     }
 }

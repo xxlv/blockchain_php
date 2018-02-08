@@ -39,6 +39,12 @@ class SpaceX
 
     }
 
+
+    public function getBlock ($index)
+    {
+        return Serialize::unSerialize($this->spaceHandle->get($index));
+    }
+
     public function getCurrentBlockChainHeight ()
     {
         return $this->spaceHandle->get('BLOCKCHAIN_CURRENT_H');
@@ -101,6 +107,14 @@ class SpaceX
         $index = $block->index;
         $this->spaceHandle->set($index, Serialize::serialize($block));
         $this->spaceHandle->set($id, $index);
+    }
+
+
+    public function empty()
+    {
+        $this->spaceHandle->flushdb();
+        $this->emptyTransactionsInMemory();
+
     }
 
 }

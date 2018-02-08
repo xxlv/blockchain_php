@@ -10,15 +10,12 @@
  */
 namespace Bc\Tools;
 
-
 class Log
 {
 
     public static function info ($str)
     {
         echo $str.PHP_EOL;
-
-        return true;
     }
 
 }

@@ -23,10 +23,10 @@ class TransactionCmd extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('bc:transaction')
+            ->setName('w:transaction')
             ->addArgument('from')
             ->addArgument('to')
-            ->addArgument('mount')
+            ->addArgument('amount')
             // the short description shown while running "php bin/console list"
             ->setDescription('Send a transaction.')
             // the full command description shown when running the command with
@@ -40,16 +40,22 @@ class TransactionCmd extends Command
         $wallet = new Wallet();
         $from = $input->getArgument('from');
         $to = $input->getArgument('to');
-        $mount = $input->getArgument('mount');
+        $amount = $input->getArgument('amount');
 
         $output->writeln([
-            sprintf('Transaction process success from %s to %s mount:%s!', $from, $to, $mount)
+            sprintf('Transaction process success from %s to %s amount:%s', $from, $to, $amount)
         ]);
 
-        $transaction = $wallet->newTransaction($from, $to, $mount);
+        $transaction = $wallet->newTransaction($from, $to, $amount);
+        if ($transaction) {
+            $output->writeln([
+                sprintf('Transaction hash is:%s', $transaction->hash())
+            ]);
+        } else {
+            $output->writeln([
+                sprintf('<error>Failed, from %s to %s, amount: %s </error>', $from, $to, $amount)
+            ]);
+        }
 
-        $output->writeln([
-            sprintf('Transaction hash is:%s!', $transaction->hash())
-        ]);
     }
 }

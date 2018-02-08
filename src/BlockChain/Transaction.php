@@ -35,12 +35,14 @@ class Transaction
 
     public function createTransaction ($from, $to, $amount, $isCoinBase = false, $blockchain = null)
     {
+
         $this->from = $from;
         $this->to = $to;
         $this->amount = $amount;
         $this->isCoinBase = $isCoinBase;
 
         $this->makeTxInput($blockchain);
+
         $this->makeTxOutput($blockchain);
 
         return $this;
@@ -53,6 +55,7 @@ class Transaction
 
     public function makeTxInput ($blockchain)
     {
+
         $scriptSig = $this->makeScriptSig($this->from);
 
         if ($blockchain && $blockchain->getCurrentBlockChainHeight() < 1) {
@@ -76,7 +79,6 @@ class Transaction
         $wallet = new Wallet();
 
         return $wallet->makeScriptSig($address);
-
     }
 
     public function transaction ()

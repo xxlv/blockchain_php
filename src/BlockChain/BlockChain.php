@@ -53,7 +53,10 @@ class BlockChain
         $blocks = $this->getChains();
 
         foreach ($blocks as $block) {
-            $UXTO += $block->computeUXTO($address);
+            if ($block) {
+                $UXTO += $block->computeUXTO($address);
+            }
+
         }
 
         return $UXTO;
@@ -90,9 +93,9 @@ class BlockChain
     protected function makeCoinBaseTransactions ()
     {
         $transaction = new Transaction();
-        $from = '1993NWvTcDpVvpRTHjybyassDSH86UQgEA';
-        $to = '163BGbKbW8PeC4GFgKS8XdgaaV3AUvtbdp';
-        $subsidy = $this->getCurrentTransactions();
+        $from = '';
+        $to = '1EWSGtKqjz88PP9ncKHkzbM2X4uUAesxwz';
+        $subsidy = $this->getCurrentSubsidy();
 
         $transaction->createTransaction($from, $to, $subsidy, true, $this);
 
@@ -220,7 +223,6 @@ class BlockChain
             $currentTransactions[] = $this->makeCoinBaseTransactions();
         }
         $block = new Block($blockChainHeight + 1, time(), $currentTransactions, $proof, $preHash);
-
         $this->appendToChain($block);
 
         return $block;
@@ -273,7 +275,15 @@ class BlockChain
      */
     public function getChains ()
     {
-        return $this->chains;
+        $index = 1;
+        while (true) {
+            if ($index > $this->getCurrentBlockChainHeight()) {
+                break;
+            }
+            yield $this->dataMoon->getBlock($index);
+            $index++;
+        }
+
     }
 
     /**
@@ -298,7 +308,7 @@ class BlockChain
      */
     public function getCurrentBlockChainHeight ()
     {
-        return $this->dataMoon->getCurrentBlockChainHeight();
+        return intval($this->dataMoon->getCurrentBlockChainHeight());
     }
 
 }

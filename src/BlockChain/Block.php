@@ -43,13 +43,12 @@ class Block
                 $transaction = $transaction->transaction();
             }
 
-            if ($transaction['from'] === $address) {
+            if ($transaction['from'] == $address) {
                 $currBlockUXTO -= $transaction['amount'];
             }
-            if ($transaction['to'] === $address) {
+            if ($transaction['to'] == $address) {
                 $currBlockUXTO += $transaction['amount'];
             }
-
         }
 
         return $currBlockUXTO;
