@@ -12,8 +12,7 @@
 namespace Bc\Command;
 
 
-use Bc\BlockChain\BlockChain;
-use Bc\BlockChain\Wallet;
+use Bc\BlockChain\Wallet\Wallet;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,7 +28,7 @@ class TransactionCmd extends Command
             ->addArgument('to')
             ->addArgument('mount')
             // the short description shown while running "php bin/console list"
-            ->setDescription('发起一笔交易.')
+            ->setDescription('Send a transaction.')
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('This command allows you to create a new transaction...');

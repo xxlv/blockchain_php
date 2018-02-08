@@ -17,15 +17,15 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class WalletCmd extends Command
+class WalletKeyCmd extends Command
 {
     protected function configure ()
     {
         $this
-            ->setName('w:balance')
-            ->setDescription('Mini Wallet')
-            ->addArgument('address')
-            ->setHelp('Find your UXTO');
+            ->setName('w:keygen')
+            ->setDescription('Create your account address')
+            ->addArgument('phrase')
+            ->setHelp('Create key pair');
     }
 
     protected function execute (InputInterface $input, OutputInterface $output)
@@ -33,15 +33,11 @@ class WalletCmd extends Command
 
 
         $wallet = new Wallet();
-        $address = $input->getArgument('address');
-        $balance = $wallet->balanceOf($address);
-
-        if ($address) {
-            $output->writeln([
-                sprintf('Address: %s , Balance: %s', $address, $balance)
-            ]);
-
-        }
+        $phrase = $input->getArgument('phrase');
+        $keyPair = $wallet->newKeyPair($phrase);
+        $output->writeln([
+            sprintf(json_encode($keyPair))
+        ]);
 
 
     }

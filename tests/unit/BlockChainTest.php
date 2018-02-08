@@ -8,22 +8,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Bc\BlockChain\Event;
 
+namespace Bc\Tests;
 
-class Event
+use PHPUnit\Framework\TestCase;
+
+class BlockChainTest extends TestCase
 {
-    public $event;
-
-    public $data;
-
-    public static function fire ($event)
+    public function testCanNo ()
     {
-        return $event->emit();
+
     }
 
-    public function emit ()
-    {
-    }
 
 }

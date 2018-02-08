@@ -13,6 +13,7 @@ namespace Bc\BlockChain;
 
 use Bc\BlockChain\Tx\TxInput;
 use Bc\BlockChain\Tx\TxOutput;
+use Bc\BlockChain\Wallet\Wallet;
 use Bc\Tools\Hash;
 
 class Transaction
@@ -54,8 +55,7 @@ class Transaction
     {
         $scriptSig = $this->makeScriptSig($this->from);
 
-        // first tx in
-        if ($blockchain && count($blockchain->chains) < 1) {
+        if ($blockchain && $blockchain->getCurrentBlockChainHeight() < 1) {
             $scriptSig = 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks';
         }
 
@@ -91,14 +91,53 @@ class Transaction
         return json_encode((array)$transaction);
     }
 
-    public function getTxInput ()
+
+    /**
+     * @return mixed
+     */
+    public function getFrom ()
     {
-        return $this->txInput;
+        return $this->from;
     }
 
-    public function getTxOutput ()
+    /**
+     * @return mixed
+     */
+    public function getTo ()
     {
-        return $this->txOutput;
+        return $this->to;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAmount ()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsCoinBase ()
+    {
+        return $this->isCoinBase;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTxInputMap ()
+    {
+        return $this->txInputMap;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTxOutputMap ()
+    {
+        return $this->txOutputMap;
     }
 
     public function hash ()

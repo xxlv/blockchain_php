@@ -57,15 +57,7 @@ class SpaceX
     {
         $id = 'BLOCKCHAIN_MEMORY_TRANSACTIONS';
         $currentTransactions = $this->spaceHandle->get($id);
-
         $currentTransactions = Serialize::unSerialize($currentTransactions);
-
-        // TODO
-        // 检测条件,当满足条件后,才会被打包
-        if (count($currentTransactions) < 10) {
-            return [];
-        }
-
 
         return $currentTransactions;
 

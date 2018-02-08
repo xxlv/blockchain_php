@@ -17,36 +17,27 @@ use Bc\Tools\Log;
 class BlockChain
 {
 
+    /**
+     * BlockChain identity
+     *
+     * @var string
+     */
     public $id = 'SPACE-X-BLOCK-CHAIN-BY-GHOST';
 
     // Data layer
     public $dataMoon;
-    /**
-     * 区块链,保存全部区块链数据
-     *
-     * @var array
-     */
-    public $chains = [];
 
-    public $nodes = [];
+    //public $chains = [];
+
+    //public $nodes = [];
+
+    //public $currentTransactions = [];
 
     public $currentBlockChainHeight = 0;
 
     public $currentBlock;
 
-    /**
-     * 当前待写入区块的交易记录
-     *
-     * @var array
-     */
-    public $currentTransactions = [];
-
-    /**
-     * 当前区块的难度系数
-     *
-     * @var string
-     */
-    public $difficulty = '00';
+    public $difficulty = '0000';
 
 
     public function __construct ()
@@ -77,7 +68,6 @@ class BlockChain
     public function initBlockChain ()
     {
         $this->loadBlockChain();
-        // init current blockchain params
         $this->currentBlockChainHeight = $this->dataMoon->getCurrentBlockChainHeight();
         $this->currentBlock = $this->dataMoon->getCurrentBlock();
     }
@@ -140,10 +130,13 @@ class BlockChain
 
         $currentTransactions = $pow['currentTransactions'];
         $proof = $pow['proof'];
+        if ($pow) {
+            // 创建block
+            $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions);
+            $this->dataMoon->emptyTransactionsInMemory();
+        }
 
 
-        // 创建block
-        $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions);
     }
 
     /**
@@ -180,7 +173,7 @@ class BlockChain
         return true;
     }
 
-    public function verifyTransaction ($transaction)
+    public function verifyTransaction (Transaction $transaction)
     {
         //检查from
         //检查to
@@ -242,21 +235,21 @@ class BlockChain
      */
     public function proofOfWork ($lastBlock)
     {
-
         $preHash = $this->hash($lastBlock);
         $guessProof = 0;
         // main Loop
         while (true) {
             $currentTransactions = $this->getCurrentTransactions();
-            //Only transactions found
             if ($currentTransactions) {
-                $hash = Hash::hash(sprintf('%s%s%s', $preHash, Hash::makeHashAble($currentTransactions), $guessProof));
+                $hash = Hash::hash(sprintf('%s%s%s', $preHash, Hash::makeHashAble($currentTransactions),
+                    $guessProof));
                 if (substr($hash, 0, strlen($this->getDifficulty())) === $this->getDifficulty()) {
                     return ['proof' => $guessProof, 'currentTransactions' => $currentTransactions];
                 }
                 $guessProof++;
             }
         }
+
     }
 
 

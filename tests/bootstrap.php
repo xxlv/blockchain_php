@@ -8,22 +8,3 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Bc\BlockChain\Event;
-
-
-class Event
-{
-    public $event;
-
-    public $data;
-
-    public static function fire ($event)
-    {
-        return $event->emit();
-    }
-
-    public function emit ()
-    {
-    }
-
-}
