@@ -11,16 +11,13 @@
 namespace Bc\BlockChain\NetworkLayer;
 
 
+use Bc\Tools\Log;
+
 class Network
 {
 
     public static function broadcast ($event)
     {
-        //...
-    }
-
-    public function route ()
-    {
-        //...
+        //Log::info('New event eimt' . json_encode($event));
     }
 }

@@ -17,7 +17,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TransactionCmd extends Command
+class Transaction extends Command
 {
     protected function configure ()
     {
@@ -43,9 +43,8 @@ class TransactionCmd extends Command
         $amount = $input->getArgument('amount');
 
         $output->writeln([
-            sprintf('Transaction process success from %s to %s amount:%s', $from, $to, $amount)
+            sprintf('Transaction from <info>%s</info> => <info>%s</info>  #<info>%s</info> ', $from, $to, $amount)
         ]);
-
         $transaction = $wallet->newTransaction($from, $to, $amount);
         if ($transaction) {
             $output->writeln([

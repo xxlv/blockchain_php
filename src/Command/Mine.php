@@ -15,10 +15,11 @@ namespace Bc\Command;
 use Bc\BlockChain\BlockChain;
 use Bc\BlockChain\DataLayer\SpaceX;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MineCmd extends Command
+class Mine extends Command
 {
     protected function configure ()
     {
@@ -34,23 +35,17 @@ class MineCmd extends Command
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-        $blockChain = new BlockChain();
 
+        $blockChain = new BlockChain();
         $dataMoon = new SpaceX();
         $output->writeln([
-            'Current Blockchain H:' . $dataMoon->getCurrentBlockChainHeight(),
-            'prepare to mining...',
+            sprintf('Blockchain(#%s) , H: %s', $blockChain->id, $dataMoon->getCurrentBlockChainHeight()),
+            '<info>prepare to mining...</info>',
         ]);
 
         while (true) {
             $blockChain->mine();
-            $output->writeln([
-                'create block success ' . $dataMoon->getCurrentBlockChainHeight(),
-                json_encode($dataMoon->getCurrentBlock()->block()),
-            ]);
-
         }
-
 
     }
 }

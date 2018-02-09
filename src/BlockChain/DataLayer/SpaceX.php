@@ -47,7 +47,7 @@ class SpaceX
 
     public function getCurrentBlockChainHeight ()
     {
-        return $this->spaceHandle->get('BLOCKCHAIN_CURRENT_H');
+        return intval($this->spaceHandle->get('BLOCKCHAIN_CURRENT_H'));
     }
 
     public function getCurrentBlock ()

@@ -15,6 +15,8 @@ use Bc\BlockChain\Tx\TxInput;
 use Bc\BlockChain\Tx\TxOutput;
 use Bc\BlockChain\Wallet\Wallet;
 use Bc\Tools\Hash;
+use Bc\Tools\Serialize;
+
 
 class Transaction
 {
@@ -22,16 +24,9 @@ class Transaction
     public $from;
     public $to;
     public $amount;
-
-    /**
-     * 仅仅矿工需要coin-base交易用来给自己以奖励
-     *
-     * @var
-     */
     public $isCoinBase;
     public $txInputMap;
     public $txOutputMap;
-
 
     public function createTransaction ($from, $to, $amount, $isCoinBase = false, $blockchain = null)
     {
@@ -90,7 +85,7 @@ class Transaction
     {
         $transaction = $this->transaction();
 
-        return json_encode((array)$transaction);
+        return Serialize::serialize((array)$transaction);
     }
 
 

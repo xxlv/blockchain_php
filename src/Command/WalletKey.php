@@ -12,25 +12,33 @@
 namespace Bc\Command;
 
 
-use Bc\BlockChain\BlockChain;
 use Bc\BlockChain\Wallet\Wallet;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GenesisCmd extends Command
+class WalletKey extends Command
 {
     protected function configure ()
     {
         $this
-            ->setName('genesis:init')
-            ->setDescription('Init a blockchain')
-            ->setHelp('Init');
+            ->setName('w:keygen')
+            ->setDescription('Create your account address')
+            ->addArgument('phrase')
+            ->setHelp('Create key pair');
     }
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-        $bc = new BlockChain();
-        $bc->dataMoon->empty();
+
+
+        $wallet = new Wallet();
+        $phrase = $input->getArgument('phrase');
+        $keyPair = $wallet->newKeyPair($phrase);
+        $output->writeln([
+            sprintf(json_encode($keyPair))
+        ]);
+
+
     }
 }

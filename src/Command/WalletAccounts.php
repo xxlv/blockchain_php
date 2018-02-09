@@ -17,28 +17,28 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class WalletKeyCmd extends Command
+class WalletAccounts extends Command
 {
     protected function configure ()
     {
         $this
-            ->setName('w:keygen')
-            ->setDescription('Create your account address')
-            ->addArgument('phrase')
-            ->setHelp('Create key pair');
+            ->setName('w:accounts')
+            ->setDescription('List your account address');
     }
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-
-
         $wallet = new Wallet();
-        $phrase = $input->getArgument('phrase');
-        $keyPair = $wallet->newKeyPair($phrase);
-        $output->writeln([
-            sprintf(json_encode($keyPair))
-        ]);
+        $accounts = $wallet->accounts();
+        $output->writeln([sprintf('Total Accounts: <info>%s</info>', count($accounts))]);
+        $info = [];
+        $index = 1;
+        foreach ($accounts as $account) {
+            $info[] = sprintf('Address #%s : <info>%s</info>  Public Key: <info>%s</info> ', $index++,
+                $account['address'],
+                $account['public_key']);
+        }
 
-
+        $output->writeln($info);
     }
 }

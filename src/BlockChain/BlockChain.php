@@ -11,33 +11,22 @@
 namespace Bc\BlockChain;
 
 use Bc\BlockChain\DataLayer\SpaceX;
+use Bc\BlockChain\Event\BlockEvent;
+use Bc\BlockChain\Event\Event;
 use Bc\Tools\Hash;
 use Bc\Tools\Log;
 
 class BlockChain
 {
-
-    /**
-     * BlockChain identity
-     *
-     * @var string
-     */
     public $id = 'SPACE-X-BLOCK-CHAIN-BY-GHOST';
 
-    // Data layer
     public $dataMoon;
-
-    //public $chains = [];
-
-    //public $nodes = [];
-
-    //public $currentTransactions = [];
 
     public $currentBlockChainHeight = 0;
 
     public $currentBlock;
 
-    public $difficulty = '0000';
+    public $difficulty = '00';
 
 
     public function __construct ()
@@ -56,15 +45,9 @@ class BlockChain
             if ($block) {
                 $UXTO += $block->computeUXTO($address);
             }
-
         }
 
         return $UXTO;
-    }
-
-    public function hash ($block)
-    {
-        return Hash::hash(Hash::makeHashAble($block));
     }
 
 
@@ -78,15 +61,13 @@ class BlockChain
     protected function loadBlockChain ()
     {
         $this->makeGenesisBlock();
-
     }
 
     protected function makeGenesisBlock ()
     {
         if ($this->getCurrentBlockChainHeight() < 1) {
             Log::info('Make genesis block');
-
-            $this->newBlock(0, 0, []);
+            $this->newBlock(0, 0, [], time());
         }
     }
 
@@ -94,7 +75,7 @@ class BlockChain
     {
         $transaction = new Transaction();
         $from = '';
-        $to = '1EWSGtKqjz88PP9ncKHkzbM2X4uUAesxwz';
+        $to = '1CXjoz2Tgqt5DJzp4NK19NUBonbzxgijGL';
         $subsidy = $this->getCurrentSubsidy();
 
         $transaction->createTransaction($from, $to, $subsidy, true, $this);
@@ -102,13 +83,12 @@ class BlockChain
         return $transaction;
     }
 
-    public function initNodes ()
-    {
-        //$this->nodes = [
-        //    new Node('127.0.0.1', '3321')
-        //];
-    }
 
+    /**
+     * coinbase的奖励
+     *
+     * @return int
+     */
     public function getCurrentSubsidy ()
     {
         return 50;
@@ -119,70 +99,93 @@ class BlockChain
      */
     public function mine ()
     {
-        // 获取当前的交易信息
-        //$currentTransactions = $this->getCurrentTransactions();
-        //$chains = $this->getChains();
-        // 获取当前区块链上的最后一个区块
-        //$lastBlock = $chains[$this->getCurrentBlockChainHeight()];
-
         $lastBlock = $this->getCurrentBlock();
-        // 获取工作证明
-        // 这里会是一个大量计算的循环
-        $pow = $this->proofOfWork($lastBlock);
+        $timestamp = time();
 
+        $pow = $this->proofOfWork($lastBlock, $this->getCurrentLockedTransactions(), $timestamp);
 
-        $currentTransactions = $pow['currentTransactions'];
-        $proof = $pow['proof'];
-        if ($pow) {
-            // 创建block
-            $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions);
-            $this->dataMoon->emptyTransactionsInMemory();
+        if ($this->verifyProofOfWork($pow)) {
+            $currentTransactions = $pow['currentTransactions'];
+            $proof = $pow['proof'];
+            $newBlock = $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions, $timestamp);
+
+            if ($this->verifyBlock($newBlock)) {
+                Event::fire(new  BlockEvent($newBlock));
+                //$this->dataMoon->emptyTransactionsInMemory();
+
+            }
         }
+    }
 
-
+    /**
+     * Verify proof of work
+     *
+     * @param $pow
+     *
+     * @return mixed
+     */
+    public function verifyProofOfWork ($pow)
+    {
+        return $pow;
     }
 
     /**
      * 验证一个block是否有效
+     * 1. 检查一个区块是否合法
+     * 2. 检查区块的proof是否合法
+     * 3. 检查区块的交易是否都有效
+     * 4. 检查区块的hash
      *
      * @param $block
      *
      * @return bool
      */
-    public function verifyBlock ($block)
+    public function verifyBlock (Block $block)
     {
-        // 检查一个区块是否合法
-        // 检查区块的proof 是否合法
-        // 检查区块的交易是否都有效
-        // 检查区块的hash
-        $block = $block->block();
-        $needHash = [
-            Hash::makeHashAble($block['timestamp']),
-            Hash::makeHashAble($block['transactions']),
-            Hash::makeHashAble($block['previousHash']),
-            Hash::makeHashAble($block['proof']),
-        ];
-        $hash = Hash::hash(join('', $needHash));
+        if ($this->isGenesisBlock($block)) {
+            return true;
+        }
 
-        if ($this->getDifficulty() == substr($hash, 0, strlen($this->getDifficulty()))) {
+        $blockData = $block->block();
+        $hash = $this->blockHash($blockData['previousHash'], $blockData['transactions'], $blockData['proof'],
+            $blockData['timestamp']);
 
-            foreach ($block['transactions'] as $transaction) {
+        if ($this->verifyBlockHash($hash)) {
+            foreach ($blockData['transactions'] as $transaction) {
                 if (!$this->verifyTransaction($transaction)) {
                     return false;
                 }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
+    public function isGenesisBlock (Block $block)
+    {
+        return $block->index == 1 && $block->previousHash == 0;
+    }
+
+    public function verifyBlockHash ($hash)
+    {
+        return $this->getDifficulty() == substr($hash, 0, strlen($this->getDifficulty()));
+    }
+
+    /**
+     * 验证交易是否合法
+     * 1. 检查交易的from
+     * 2. 检查交易的to
+     * 3. 检查交易的数额
+     *
+     * @param Transaction $transaction
+     *
+     * @return bool
+     */
     public function verifyTransaction (Transaction $transaction)
     {
-        //检查from
-        //检查to
-        //检查amount
         $transactionArr = $transaction->transaction();
-
         if ($transaction->isCoinBase()) {
             return false;
         }
@@ -195,16 +198,6 @@ class BlockChain
         return true;
     }
 
-    /**
-     * 广播
-     *
-     * @return bool
-     */
-    public function broadcast ()
-    {
-        // get current block and broadcast it
-        return true;
-    }
 
     /**
      * 创建一个block
@@ -212,48 +205,65 @@ class BlockChain
      * @param $proof
      * @param $preHash
      * @param $currentTransactions
+     * @param $timestamp
      *
-     * @return array
+     * @return Block
      */
-    public function newBlock ($proof, $preHash, $currentTransactions)
+    public function newBlock ($proof, $preHash, $currentTransactions, $timestamp)
     {
         $blockChainHeight = $this->getCurrentBlockChainHeight();
 
-        if ($blockChainHeight === 0) {
+        if ($blockChainHeight == 0) {
             $currentTransactions[] = $this->makeCoinBaseTransactions();
         }
-        $block = new Block($blockChainHeight + 1, time(), $currentTransactions, $proof, $preHash);
-        $this->appendToChain($block);
+
+        $block = new Block($blockChainHeight + 1, $timestamp, $currentTransactions, $proof, $preHash);
+
+        if ($this->verifyBlock($block)) {
+            $this->appendToChain($block);
+        }
 
         return $block;
     }
 
     /**
-     * 工作量证明
+     * Proof of work
      *
      * @param $lastBlock
+     * @param $lockedTransactions
+     * @param $lockedTime
      *
-     * @return int
+     * @return array
      */
-    public function proofOfWork ($lastBlock)
+    public function proofOfWork ($lastBlock, $lockedTransactions, $lockedTime)
     {
         $preHash = $this->hash($lastBlock);
         $guessProof = 0;
-        // main Loop
-        while (true) {
-            $currentTransactions = $this->getCurrentTransactions();
-            if ($currentTransactions) {
-                $hash = Hash::hash(sprintf('%s%s%s', $preHash, Hash::makeHashAble($currentTransactions),
-                    $guessProof));
+        //$lockedTransactions = $this->getCurrentLockedTransactions();
+        if ($lockedTransactions) {
+            //锁定池交易时间
+            //$lockedTime = time();
+            while (true) {
+                $hash = $this->blockHash($preHash, $lockedTransactions, $guessProof, $lockedTime);
+
                 if (substr($hash, 0, strlen($this->getDifficulty())) === $this->getDifficulty()) {
-                    return ['proof' => $guessProof, 'currentTransactions' => $currentTransactions];
+                    return ['proof' => $guessProof, 'currentTransactions' => $lockedTransactions];
                 }
                 $guessProof++;
             }
         }
 
+        return [];
     }
 
+
+    public function blockHash ($preHash, $transactions, $proof, $timestamp)
+    {
+        $hash = Hash::hash(sprintf('%s%s%s%s', $preHash, Hash::makeHashAble($transactions), $proof,
+            $timestamp));
+
+        return $hash;
+    }
 
     protected function appendToChain ($block)
     {
@@ -287,6 +297,17 @@ class BlockChain
     }
 
     /**
+     * 获取当前锁定的内存交易,这些交易将被打包进入下一个区块
+     * 这些交易来源于当前的内存交易池
+     *
+     * @return array
+     */
+    public function getCurrentLockedTransactions ()
+    {
+        return $this->dataMoon->getCurrentTransactions();
+    }
+
+    /**
      * @return array
      */
     public function getCurrentTransactions ()
@@ -309,6 +330,12 @@ class BlockChain
     public function getCurrentBlockChainHeight ()
     {
         return intval($this->dataMoon->getCurrentBlockChainHeight());
+    }
+
+
+    public function hash ($block)
+    {
+        return Hash::hash(Hash::makeHashAble($block));
     }
 
 }

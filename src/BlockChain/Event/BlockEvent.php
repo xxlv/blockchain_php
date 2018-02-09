@@ -14,24 +14,23 @@ namespace Bc\BlockChain\Event;
 use Bc\BlockChain\DataLayer\SpaceX;
 use Bc\BlockChain\NetworkLayer\Network;
 
-class TransactionEvent extends Event
+class BlockEvent extends Event
 {
-    public $event = 'TRANSACTION';
+    public $event = 'BLOCK';
 
     public $data;
 
     public $dataMoon;
 
 
-    public function __construct ($transaction)
+    public function __construct ($block)
     {
-        $this->data = $transaction;
+        $this->data = $block;
         $this->dataMoon = new SpaceX();
     }
 
     public function emit ()
     {
-        $this->dataMoon->appendTransactionsToMemory($this->data);
         Network::broadcast($this);
     }
 

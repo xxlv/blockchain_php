@@ -12,37 +12,24 @@
 namespace Bc\Command;
 
 
-use Bc\BlockChain\Wallet\Wallet;
+use Bc\BlockChain\BlockChain;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class WalletCmd extends Command
+class Genesis extends Command
 {
     protected function configure ()
     {
         $this
-            ->setName('w:balance')
-            ->setDescription('Mini Wallet')
-            ->addArgument('address')
-            ->setHelp('Find your UXTO');
+            ->setName('genesis:init')
+            ->setDescription('Init a blockchain')
+            ->setHelp('Init');
     }
 
     protected function execute (InputInterface $input, OutputInterface $output)
     {
-
-
-        $wallet = new Wallet();
-        $address = $input->getArgument('address');
-        $balance = $wallet->balanceOf($address);
-
-        if ($address) {
-            $output->writeln([
-                sprintf('Address: %s , Balance: %s', $address, $balance)
-            ]);
-
-        }
-
-
+        $bc = new BlockChain();
+        $bc->dataMoon->empty();
     }
 }

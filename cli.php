@@ -20,10 +20,11 @@ $application = new Application();
 
 $application->setName('Blockchain in PHP');
 
-$application->add(new \Bc\Command\MineCmd());
-$application->add(new \Bc\Command\TransactionCmd());
-$application->add(new \Bc\Command\WalletCmd());
-$application->add(new \Bc\Command\WalletKeyCmd());
-$application->add(new \Bc\Command\GenesisCmd());
+$application->add(new \Bc\Command\Mine());
+$application->add(new \Bc\Command\Transaction());
+$application->add(new \Bc\Command\Wallet());
+$application->add(new \Bc\Command\WalletKey());
+$application->add(new \Bc\Command\WalletAccounts());
+$application->add(new \Bc\Command\Genesis());
 
 $application->run();
