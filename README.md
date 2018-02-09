@@ -5,9 +5,14 @@ A simplified blockchain implementation in PHP
 
 #### TODO
 
-[✔️]  BlockChain Data
-[✔]  Transactions & Signature
-[✔]  Wallet
-[ ]  Network
-[ ]  Tests
+[✔️]  BlockChain Data  
+
+[✔]  Transactions & Signature  
+
+[✔]  Wallet  
+
+[ ]  Network  
+
+[ ]  Tests  
+
  
