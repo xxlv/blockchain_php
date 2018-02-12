@@ -32,6 +32,8 @@ class BlockEvent extends Event
     public function emit ()
     {
         Network::broadcast($this);
+        $this->dataMoon->emptyTransactionsInMemory();
+
     }
 
 

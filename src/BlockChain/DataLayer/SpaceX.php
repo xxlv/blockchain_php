@@ -59,6 +59,13 @@ class SpaceX
         return Serialize::unSerialize($block);
     }
 
+    public function getBlockByIndex ($index)
+    {
+        $block = $this->spaceHandle->get($index);
+
+        return Serialize::unSerialize($block);
+    }
+
     public function getCurrentTransactions ()
     {
         $id = 'BLOCKCHAIN_MEMORY_TRANSACTIONS';

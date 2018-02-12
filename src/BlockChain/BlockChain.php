@@ -107,11 +107,10 @@ class BlockChain
         if ($this->verifyProofOfWork($pow)) {
             $currentTransactions = $pow['currentTransactions'];
             $proof = $pow['proof'];
-            $newBlock = $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions, $timestamp);
 
+            $newBlock = $this->newBlock($proof, $this->hash($lastBlock), $currentTransactions, $timestamp);
             if ($this->verifyBlock($newBlock)) {
                 Event::fire(new  BlockEvent($newBlock));
-                //$this->dataMoon->emptyTransactionsInMemory();
 
             }
         }
@@ -150,6 +149,13 @@ class BlockChain
         $hash = $this->blockHash($blockData['previousHash'], $blockData['transactions'], $blockData['proof'],
             $blockData['timestamp']);
 
+        $lastBlock = $this->getBlockByIndex($block->index - 1);
+
+        $previousHash = $this->hash($lastBlock);
+        // check hash is equal
+        if ($previousHash != $blockData['previousHash']) {
+            return false;
+        }
         if ($this->verifyBlockHash($hash)) {
             foreach ($blockData['transactions'] as $transaction) {
                 if (!$this->verifyTransaction($transaction)) {
@@ -217,7 +223,8 @@ class BlockChain
             $currentTransactions[] = $this->makeCoinBaseTransactions();
         }
 
-        $block = new Block($blockChainHeight + 1, $timestamp, $currentTransactions, $proof, $preHash);
+        $block = new Block($blockChainHeight + 1, $timestamp, $currentTransactions, $proof, $preHash,
+            $this->blockHash($preHash, $currentTransactions, $proof, $timestamp));
 
         if ($this->verifyBlock($block)) {
             $this->appendToChain($block);
@@ -322,6 +329,11 @@ class BlockChain
     public function getCurrentBlock ()
     {
         return $this->dataMoon->getCurrentBlock();
+    }
+
+    public function getBlockByIndex ($index)
+    {
+        return $this->dataMoon->getBlockByIndex($index);
     }
 
     /**

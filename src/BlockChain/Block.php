@@ -19,14 +19,16 @@ class Block
     public $transactions;
     public $proof;
     public $previousHash;
+    public $hash;
 
-    public function __construct ($index, $timestamp, $transactions, $proof, $previousHash)
+    public function __construct ($index, $timestamp, $transactions, $proof, $previousHash, $hash)
     {
         $this->index = $index;
         $this->timestamp = $timestamp;
         $this->transactions = $transactions;
         $this->previousHash = $previousHash;
         $this->proof = $proof;
+        $this->hash = $hash;
     }
 
     public function block ()
