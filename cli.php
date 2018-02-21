@@ -21,6 +21,9 @@ $application = new Application();
 $application->setName('Blockchain in PHP');
 
 $application->add(new \Bc\Command\Mine());
+$application->add(new \Bc\Command\Run());
+$application->add(new \Bc\Command\Ping());
+
 $application->add(new \Bc\Command\Transaction());
 $application->add(new \Bc\Command\Wallet());
 $application->add(new \Bc\Command\WalletKey());

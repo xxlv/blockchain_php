@@ -13,6 +13,7 @@ namespace Bc\BlockChain;
 use Bc\BlockChain\DataLayer\SpaceX;
 use Bc\BlockChain\Event\BlockEvent;
 use Bc\BlockChain\Event\Event;
+use Bc\BlockChain\NetworkLayer\Network;
 use Bc\Tools\Hash;
 use Bc\Tools\Log;
 
@@ -92,6 +93,16 @@ class BlockChain
     public function getCurrentSubsidy ()
     {
         return 50;
+    }
+
+    public function ping ()
+    {
+        Network::ping();
+    }
+
+    public function run ()
+    {
+        Network::run();
     }
 
     /**

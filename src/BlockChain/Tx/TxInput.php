@@ -15,10 +15,12 @@ class TxInput
 {
     public $id;
     public $scriptSig;
+    public $pubKey;
 
-    public function __construct ($id, $scriptSig)
+    public function __construct ($id, $scriptSig, $pubKey = null)
     {
         $this->id = $id;
         $this->scriptSig = $scriptSig;
+        $this->pubKey = $pubKey;
     }
 }

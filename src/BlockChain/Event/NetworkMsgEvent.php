@@ -11,32 +11,27 @@
 namespace Bc\BlockChain\Event;
 
 
-use Bc\BlockChain\Block;
 use Bc\BlockChain\DataLayer\SpaceX;
 use Bc\BlockChain\NetworkLayer\Network;
-use Bc\Tools\Log;
 
-class BlockEvent extends Event
+class NetworkMsgEvent extends Event
 {
-    public $event = 'BLOCK';
+    public $event = 'NETWORK_MSG';
 
     public $data;
 
     public $dataMoon;
 
 
-    public function __construct (Block $block)
+    public function __construct ($data)
     {
-        $this->data = $block;
+        $this->data = $data;
         $this->dataMoon = new SpaceX();
     }
 
     public function emit ()
     {
-        Log::info(sprintf('new block created at %s', $this->data->index));
-        Network::broadcast($this);
-        $this->dataMoon->emptyTransactionsInMemory();
-
+        //...
     }
 
 
